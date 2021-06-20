@@ -39,7 +39,9 @@ for article_path in Path("articles").iterdir():
         # title = match(r".*Passage 0[123] (.*)", article_path.stem)[1]
         title = article_path.stem
         # print(title)
-        para_list = [p.text for p in html.cssselect("p") if p.text]
+        para_list = [
+            p.text.strip() for p in html.cssselect("p") if p.text and p.text.strip()
+        ]
 
         article_data = {}
         article_data["title"] = title
@@ -55,17 +57,32 @@ for article_path in Path("articles").iterdir():
             # print(text_marked)
             article_data["para"].append({"text": text, "marked": text_marked})
         print(len(appeared_set))
-        article_data["count"] = len(appeared_set)
+        article_data["appeared"] = appeared_set
         data.append(article_data)
 
-    i += 1
-    # if i > 10:
-    #     break
+data = sorted(data, key=lambda article: len(article["appeared"]), reverse=True)
+top10 = [data[0]]
+del data[0]
+for i in range(9):
+    print(f"round {i + 1}")
+    word_list = list(set(word_list) - top10[-1]["appeared"])
+    for article in data:
+        appeared_set = set()
+        for para in article["para"]:
+            for word in word_list:
+                if find_all(word, para["text"]):
+                    appeared_set.add(word)
+        print(article["title"])
+        print(len(appeared_set))
+        article["appeared"] = appeared_set
+    data = sorted(data, key=lambda article: len(article["appeared"]), reverse=True)
+    top10.append(data[0])
+    del data[0]
 
-data = sorted(data, key=lambda article: article["count"], reverse=True)
+word_list = list(set(word_list) - top10[-1]["appeared"])
 
 document = Document()
-for article in data:
+for article in top10:
     # print(article["title"])
     # print(article["count"])
     document.add_heading(article["title"])
@@ -77,7 +94,13 @@ for article in data:
             p.add_run(para["text"][max(mark.start(0), pos) : mark.end(0)]).bold = True
             pos = mark.end(0)
         p.add_run(para["text"][pos:])
-    document.add_paragraph(f'count: {article["count"]}')
     document.add_page_break()
 
+document.add_paragraph(
+    f'covered by top 10: {sum(len(article["appeared"]) for article in top10)}'
+)
+
 document.save("output.docx")
+
+with open("uncovered.txt", "w") as uncovered_file:
+    uncovered_file.write("\n".join(sorted(word_list)))
