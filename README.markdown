@@ -6,6 +6,9 @@ sudo apt install curl
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
+sudo apt install python3-pip
+pip3 install lxml cssselect python-docx
+
 # in directory proj
 npm install puppeteer
 ```
@@ -33,3 +36,16 @@ mkdir articles
 node fetch.js
 ```
 
+----
+
+Manually preprocess word list file, mostly add placeholder for missing phonetic transcription.
+
+```bash
+python3 process.py
+```
+
+If any word unwanted, comment from `words.txt`.
+
+```bash
+python3 process2.py
+```
