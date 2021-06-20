@@ -14,15 +14,13 @@ print(len(word_list))
 re_dict = {}
 for word in word_list:
     word_re = f"({escape(word)})|({escape(word.capitalize())})"
-    word_ext_set = set()
-    for word_ext_list in getAllInflections(word, 'N').values():
-        for word_ext in word_ext_list:
-            word_ext_set.add(word_ext)
-    for word_ext_list in getAllInflections(word, 'V').values():
-        for word_ext in word_ext_list:
-            word_ext_set.add(word_ext)
+    word_ext_set = {
+        word_ext
+        for word_ext_list in getAllInflections(word).values()
+        for word_ext in word_ext_list
+    }
     for word_ext in word_ext_set:
-        word_re += f"|({escape(word_ext)})|({escape(word_ext.capitalize())})"    
+        word_re += f"|({escape(word_ext)})|({escape(word_ext.capitalize())})"
     word_re = r"(?<![a-zA-Z])(" + word_re + r")(?![a-zA-Z])"
     re_dict[word] = compile(word_re)
 
@@ -82,4 +80,4 @@ for article in data:
     document.add_paragraph(f'count: {article["count"]}')
     document.add_page_break()
 
-document.save('output.docx')
+document.save("output.docx")

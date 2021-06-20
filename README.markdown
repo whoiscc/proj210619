@@ -7,7 +7,7 @@ curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 sudo apt install python3-pip
-pip3 install lxml cssselect python-docx
+pip3 install lxml cssselect python-docx pyinflect
 
 # in directory proj
 npm install puppeteer
